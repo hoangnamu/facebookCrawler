@@ -1,4 +1,5 @@
 var accessToken;
+var crawlMode;
 
 function loginFB(elmnt, clr) {
   initFB(elmnt, clr);
@@ -54,16 +55,36 @@ var textnode;
 function getPostsWithLimit(token, limit) {
   console.log("run get data with limit function");
   var url = document.getElementById("txtInput").value;
-
+  var crawlFields;
+  if (crawlMode === "posts") {
+    crawlFields = "feed.limit(3)";
+  } else if (crawlMode === "comments") {
+    crawlFields = "comments.limit(2)";
+  } else if (crawlMode === "user friends") {
+    crawlFields = "friends";
+  } else {
+    crawlFields = "";
+  }
+  if (crawlFields === "") {
+    return;
+  }
   FB.api(
     "/" + url,
     {
       acccess_token: accessToken,
-      fields: "feed.limit(3)"
+      fields: crawlFields
     },
     function(response) {
-      console.log("response.feed : ", response.feed);
-      parseData(response.feed);
+      console.log(crawlMode);
+      if (crawlMode === "posts") {
+        console.log("crawl posts mode");
+        parseData(response.feed);
+      } else if (crawlMode === "comments") {
+        console.log("crawl comments mode");
+        parseData(response.comments);
+      } else if (crawlMode === "user friends") {
+      } else {
+      }
     }
   );
 }
@@ -85,4 +106,9 @@ function parseData(facebookRes) {
       parseData(response);
     });
   }
+}
+
+function changeCrawlMode(sel) {
+  crawlMode = sel.options[sel.selectedIndex].text;
+  console.log("choose mode : ", crawlMode);
 }
