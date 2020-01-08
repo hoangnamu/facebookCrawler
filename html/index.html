@@ -85,26 +85,24 @@
                             <div class="ilstrator_thumb">
                                 <img src="img/ilstrator/illustration.png" alt="" />
                             </div>
+                            <div>
+                                <select id="box1" style="width:300px;" onChange="changeCrawlMode(this);">
+                                    <option value="1">posts</option>
+                                    <option value="2">comments</option>
+                                    <option value="3">user friends</option>
+                                </select>
+                            </div>
+                            <input id="txtInput" type="text" placeholder="URL to post"  
+                            value="me" style="width:500px;height: 70px;"></input>
+                            <button3 id="getData" class="button3" id="btnGet"
+                                onclick="javascript:getPostsWithLimit(this,3, 'red')">
+                                Get Data</button3>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
-    <div>
-        <select id="box1" style="width:300px;" onChange="changeCrawlMode(this);">
-            <option value="1">posts</option>
-            <option value="2">comments</option>
-            <option value="3">user friends</option>
-        </select>
-    </div>
-    <input id="txtInput" type="text" placeholder="URL to post" style="width:500px;height: 70px;"></input>
-    <button3 id="getData" class="button3" style="vertical-align:middle" id="btnGet"
-        onclick="javascript:getPostsWithLimit(this,3, 'red')">
-        <span>Get
-            Data </span></button3>
-
-    <div id="myDIV"></div>
+  
 
 </body>

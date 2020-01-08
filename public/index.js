@@ -17,7 +17,7 @@ function loginFB(elmnt, clr) {
       }
     },
     {
-      scope: "manage_pages,pages_show_list"
+      scope: "manage_pages,pages_show_list,user_friends"
     }
   );
 }
@@ -51,7 +51,7 @@ function getData(token) {
 
 var node;
 var textnode;
-
+var result = null;
 function getPostsWithLimit(token, limit) {
   console.log("run get data with limit function");
   var url = document.getElementById("txtInput").value;
@@ -76,6 +76,7 @@ function getPostsWithLimit(token, limit) {
     },
     function(response) {
       console.log(crawlMode);
+      result = [];
       if (crawlMode === "posts") {
         console.log("crawl posts mode");
         parseData(response.feed);
@@ -83,31 +84,85 @@ function getPostsWithLimit(token, limit) {
         console.log("crawl comments mode");
         parseData(response.comments);
       } else if (crawlMode === "user friends") {
+        console.log(response.friends);
+        parseFriendsData(response.friends);
       } else {
       }
     }
   );
 }
+function objToCSV(arr) {}
 
 function parseData(facebookRes) {
   console.log("facebookRes : ", facebookRes);
   for (var i = 0; i < facebookRes.data.length; i++) {
-    console.log(facebookRes.data[i].message);
+    var message = facebookRes.data[i].message;
+    var createTime = facebookRes.data[i].created_time;
+    result.push([createTime, message]);
+    console.log(createTime, message);
     // parsing data here :
     var node = document.createElement("P"); // Create a <li> node
     var response = facebookRes.data[i];
     var textnode = document.createTextNode(JSON.stringify(response)); // Create a text node
-    node.appendChild(textnode); // Append the text to <li>
-    document.getElementById("myDIV").appendChild(node);
+    document.getElementById("myDIV").appendChild(textnode);
   }
   var nextURL = facebookRes.paging.next;
   if (nextURL != null) {
     FB.api(nextURL, {}, function(response) {
       parseData(response);
     });
+  } else {
+    outputToFile();
   }
 }
 
+function parseFriendsData(facebookRes) {
+  console.log("facebookRes : ", facebookRes.data);
+  for (var i = 0; i < facebookRes.data.length; i++) {
+    var entry = facebookRes.data[i];
+    var name = entry["name"];
+    var uid = entry["id"];
+    result.push([uid, name]);
+    console.log(entry, name, uid);
+    // parsing data here :
+    var node = document.createElement("P"); // Create a <li> node
+    var response = facebookRes.data[i];
+    var textnode = document.createTextNode(JSON.stringify(response)); // Create a text node
+    document.getElementById("myDIV").appendChild(textnode);
+  }
+  var nextURL = facebookRes.paging.next;
+  if (nextURL != null) {
+    FB.api(nextURL, {}, function(response) {
+      parseFriendsData(response);
+    });
+  } else {
+    outputToFile();
+  }
+}
+function outputToFile() {
+  var text = "";
+  if (result != null) {
+    for (var i = 0; i < result.length; ++i) {
+      text = result[i][0] + "," + result[i][1] + "\n";
+    }
+  }
+  download("result.csv", text);
+}
+function download(filename, text) {
+  var element = document.createElement("a");
+  element.setAttribute(
+    "href",
+    "data:text/plain;charset=utf-8," + encodeURIComponent(text)
+  );
+  element.setAttribute("download", filename);
+
+  element.style.display = "none";
+  document.body.appendChild(element);
+
+  element.click();
+
+  document.body.removeChild(element);
+}
 function changeCrawlMode(sel) {
   crawlMode = sel.options[sel.selectedIndex].text;
   console.log("choose mode : ", crawlMode);
